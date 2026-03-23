@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.12'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.taeyang'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    /*
+       1. runtimeOnly : 컴파일 할 때는 필요하지 않고 애플리케이션이 실행될 때만 필요
+       2. compileOnly : 컴파일 할 때만 필요하고, 실행 시에는 필요 없는 의존성
+       3. implementation : 컴파일, 실행 모두 필요
+     */
+
+    /* 1. web 의존성 */
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    /* 2. JWT 의존성 */
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+    /* 3. lombok 의존성 */
+	compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    /* 4. DB 의존성 */
+    //implementation 'mysql:mysql-connector-java:8.0.33'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+
+    /* 5. 테스트 의존성 */
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    /* 6. Validation 의존성 */
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    /* 7. Security 의존성 */
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
