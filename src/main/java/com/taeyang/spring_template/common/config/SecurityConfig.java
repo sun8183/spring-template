@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -32,18 +34,28 @@ public class SecurityConfig {
                 // 3. 세션을 사용하지 않도록 설정 (Stateless)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 // 4. URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/member/login").permitAll() // 로그인, 회원가입 등은 누구나 접근 가능
+                        .requestMatchers("/api/member/login", "/h2-console/**").permitAll() // 로그인, 회원가입 등은 누구나 접근 가능
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 관리자 전용 API
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )
 
                 // 5. JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치하여 토큰 먼저 검사
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+
+
+                // 6. 동일 출처에 IFRAME 혀용
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                );
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

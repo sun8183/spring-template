@@ -1,7 +1,9 @@
 package com.taeyang.spring_template.common.exception.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.taeyang.spring_template.common.exception.enums.ErrorCode;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(String code, String message, Object details) {
 
     // 추가 정보(Validation 결과 등)가 필요한 에러용

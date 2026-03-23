@@ -2,6 +2,7 @@ package com.taeyang.spring_template.auth.provider;
 
 import com.taeyang.spring_template.auth.config.JwtProperties;
 import com.taeyang.spring_template.auth.enums.JwtCode;
+import com.taeyang.spring_template.auth.enums.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -21,16 +22,32 @@ public class JwtTokenProvider {
     private final JwtProperties jwtProperties;
     private SecretKey key;
 
+    // SecretKey 값 암호화 추출
     @PostConstruct
     protected void init() {
         byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 토큰 생성 
-    public String createToken(String userId) {
+    // 액세스 토큰 생성 (권한 정보 포함)
+    public String createToken(String userId, Role role) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
+
+        return Jwts.builder()
+                .header().add("typ", "JWT").and()
+                .subject(userId)
+                .claim("role", role) // 권한 정보 추가
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(key)
+                .compact();
+    }
+
+    // 리프레시 토큰 생성
+    public String createRefreshToken(String userId) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
 
         return Jwts.builder()
                 .header().add("typ", "JWT").and()

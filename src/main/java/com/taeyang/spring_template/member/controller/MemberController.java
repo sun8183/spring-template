@@ -2,6 +2,8 @@ package com.taeyang.spring_template.member.controller;
 
 import com.taeyang.spring_template.common.exception.dto.SuccessResponse;
 import com.taeyang.spring_template.member.dto.LoginRequest;
+import com.taeyang.spring_template.member.dto.TokenResponse;
+import com.taeyang.spring_template.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/member")
+@RequestMapping("/api/member")
 public class MemberController {
 
+    private final MemberService memberService;
+
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponse<Void>> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(SuccessResponse.noContent());
+    public ResponseEntity<SuccessResponse<TokenResponse>> login(@RequestBody @Valid LoginRequest request) {
+        return ResponseEntity.ok(SuccessResponse.of(memberService.login(request)));
     }
+
 }

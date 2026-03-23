@@ -3,7 +3,7 @@ package com.taeyang.spring_template.common.exception.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.taeyang.spring_template.common.exception.enums.SuccessCode;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL) // data null일 때 출력 X
 public record SuccessResponse<T>(
         String code,
         String message,
