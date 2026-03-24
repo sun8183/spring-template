@@ -1,8 +1,11 @@
 package com.taeyang.spring_template.auth.enums;
 
 public enum JwtCode {
-    ACCESS,
-    EXPIRED,
+    VALID,
     INVALID,
-    DENIED,
+    EXPIRED,
+    MALFORMED,
+    UNSUPPORTED,
+    SIGNATURE_INVALID,
+    EMPTY
 }

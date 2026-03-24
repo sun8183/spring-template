@@ -65,18 +65,21 @@ public class JwtTokenProvider {
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            return JwtCode.ACCESS;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.error("잘못된 JWT 서명입니다.");
-            return JwtCode.INVALID;
+            return JwtCode.VALID;
+        } catch (io.jsonwebtoken.security.SecurityException e) {
+            log.error("JWT 서명이 유효하지 않습니다.", e);
+            return JwtCode.SIGNATURE_INVALID;
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 형식의 JWT 토큰입니다.", e);
+            return JwtCode.MALFORMED;
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT 토큰입니다.");
+            log.error("만료된 JWT 토큰입니다.", e);
             return JwtCode.EXPIRED;
         } catch (UnsupportedJwtException e) {
-            log.error("지원되지 않는 JWT 토큰입니다.");
-            return JwtCode.INVALID;
+            log.error("지원되지 않는 JWT 토큰입니다.", e);
+            return JwtCode.UNSUPPORTED;
         } catch (IllegalArgumentException e) {
-            log.error("JWT 토큰이 잘못되었습니다.");
+            log.error("JWT 토큰이 잘못되었습니다.", e);
             return JwtCode.INVALID;
         }
     }

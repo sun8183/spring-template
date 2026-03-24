@@ -45,7 +45,6 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class)
 
-
                 // 6. 동일 출처에 IFRAME 혀용
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.sameOrigin())

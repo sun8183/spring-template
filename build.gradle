@@ -58,6 +58,9 @@ dependencies {
 
     /* 7. Security 의존성 */
     implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	/* 8. Redis*/
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {

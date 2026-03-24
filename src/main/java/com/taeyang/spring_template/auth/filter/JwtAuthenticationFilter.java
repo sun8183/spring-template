@@ -1,7 +1,8 @@
 package com.taeyang.spring_template.auth.filter;
-
 import com.taeyang.spring_template.auth.enums.JwtCode;
 import com.taeyang.spring_template.auth.provider.JwtTokenProvider;
+import com.taeyang.spring_template.common.exception.CommonException;
+import com.taeyang.spring_template.common.exception.enums.ErrorCode;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import static com.taeyang.spring_template.common.exception.enums.ErrorCode.*;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -22,20 +25,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException, java.io.IOException {
 
         String token = resolveToken(request);
-
-        if (token != null){
+        if (token != null) {
             JwtCode tokenStatus = jwtTokenProvider.validateToken(token);
-
-            switch (tokenStatus){
-                case ACCESS:
+            switch (tokenStatus) {
+                case VALID:
                     break;
-
-                case INVALID:
-                    break;
-
                 case EXPIRED:
-                    break;
+                    throw new CommonException(ErrorCode.JWT_EXPIRED);
+                case MALFORMED:
+                    throw new CommonException(ErrorCode.JWT_MALFORMED);
+                case UNSUPPORTED:
+                    throw new CommonException(JWT_UNSUPPORTED);
+                case SIGNATURE_INVALID:
+                    throw new CommonException(ErrorCode.JWT_SIGNATURE_INVALID);
+                case EMPTY:
+                    throw new CommonException(ErrorCode.JWT_EMPTY);
+                case INVALID:
+                default:
+                    throw new CommonException(JWT_INVALID);
             }
+        } else {
+            throw new CommonException(ErrorCode.JWT_EMPTY);
         }
 
         // 4. 다음 필터로 이동
