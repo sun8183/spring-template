@@ -1,4 +1,4 @@
-package com.taeyang.spring_template.member.dto;
+package com.taeyang.spring_template.auth.ui.dto;
 
 public record TokenResponse(
         String accessToken,

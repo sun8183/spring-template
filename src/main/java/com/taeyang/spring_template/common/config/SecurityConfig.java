@@ -1,7 +1,7 @@
 package com.taeyang.spring_template.common.config;
 
-import com.taeyang.spring_template.auth.filter.JwtAuthenticationFilter;
-import com.taeyang.spring_template.auth.provider.JwtTokenProvider;
+import com.taeyang.spring_template.auth.ui.filter.JwtAuthenticationFilter;
+import com.taeyang.spring_template.auth.infrastructure.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 4. URL별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/member/login", "/h2-console/**").permitAll() // 로그인, 회원가입 등은 누구나 접근 가능
+                        .requestMatchers("/api/auth/login", "/h2-console/**").permitAll() // 로그인, 회원가입 등은 누구나 접근 가능
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 관리자 전용 API
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
                 )

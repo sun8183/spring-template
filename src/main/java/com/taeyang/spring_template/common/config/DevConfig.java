@@ -1,8 +1,8 @@
 package com.taeyang.spring_template.common.config;
 
-import com.taeyang.spring_template.auth.enums.Role;
+import com.taeyang.spring_template.member.domain.enums.Role;
 import com.taeyang.spring_template.member.domain.Member;
-import com.taeyang.spring_template.member.repository.MemberRepository;
+import com.taeyang.spring_template.member.domain.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;

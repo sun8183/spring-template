@@ -1,18 +1,21 @@
-package com.taeyang.spring_template.auth.provider;
+package com.taeyang.spring_template.auth.infrastructure.jwt;
 
 import com.taeyang.spring_template.auth.config.JwtProperties;
-import com.taeyang.spring_template.auth.enums.JwtCode;
-import com.taeyang.spring_template.auth.enums.Role;
+import com.taeyang.spring_template.auth.infrastructure.jwt.enums.JwtCode;
+import com.taeyang.spring_template.member.domain.enums.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+
+import static com.taeyang.spring_template.auth.infrastructure.jwt.enums.JwtCode.*;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .header().add("typ", "JWT").and()
                 .subject(userId)
-                .claim("role", role) // 권한 정보 추가
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(key)
@@ -58,37 +61,24 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // 토큰 검증
     public JwtCode validateToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            log.error("만료된 JWT 토큰입니다.");
+            return EMPTY;
+        }
+
         try {
             Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
-            return JwtCode.VALID;
-        } catch (io.jsonwebtoken.security.SecurityException e) {
-            log.error("JWT 서명이 유효하지 않습니다.", e);
-            return JwtCode.SIGNATURE_INVALID;
-        } catch (MalformedJwtException e) {
-            log.error("잘못된 형식의 JWT 토큰입니다.", e);
-            return JwtCode.MALFORMED;
+            return VALID;
         } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT 토큰입니다.", e);
-            return JwtCode.EXPIRED;
-        } catch (UnsupportedJwtException e) {
-            log.error("지원되지 않는 JWT 토큰입니다.", e);
-            return JwtCode.UNSUPPORTED;
-        } catch (IllegalArgumentException e) {
-            log.error("JWT 토큰이 잘못되었습니다.", e);
-            return JwtCode.INVALID;
+            log.warn("만료된 JWT 토큰입니다.");
+            return EXPIRED;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.error("유효하지 않은 JWT 토큰입니다: {}", e.getMessage());
+            return INVALID;
         }
-    }
-
-    public Claims getClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
     }
 }

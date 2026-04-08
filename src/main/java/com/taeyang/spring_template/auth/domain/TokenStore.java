@@ -4,9 +4,23 @@ import java.util.Optional;
 
 public interface TokenStore {
 
-    void save(Long idx, String refreshToken);
+    /**
+     * 리프레시 토큰 저장
+     * @param memberId 사용자 식별자 (Key)
+     * @param refreshToken 발급된 리프레시 토큰 (Value)
+     */
+    void save(String memberId, String refreshToken);
 
-    Optional<String> findByMemberId(Long idx);
+    /**
+     * 사용자 식별자로 저장된 리프레시 토큰 조회
+     * @param memberId 사용자 식별자
+     * @return 저장된 토큰 (없을 수 있음)
+     */
+    Optional<String> findByMemberId(String memberId);
 
-    void deleteByMemberId(Long idx);
+    /**
+     * 사용자 식별자로 저장된 리프레시 토큰 삭제 (로그아웃 등)
+     * @param memberId 사용자 식별자
+     */
+    void deleteByMemberId(String memberId);
 }

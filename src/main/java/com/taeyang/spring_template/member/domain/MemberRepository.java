@@ -1,6 +1,5 @@
-package com.taeyang.spring_template.member.repository;
+package com.taeyang.spring_template.member.domain;
 
-import com.taeyang.spring_template.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

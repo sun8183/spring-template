@@ -1,6 +1,6 @@
 package com.taeyang.spring_template.member.domain;
 
-import com.taeyang.spring_template.auth.enums.Role;
+import com.taeyang.spring_template.member.domain.enums.Role;
 import com.taeyang.spring_template.common.exception.CommonException;
 import com.taeyang.spring_template.common.exception.enums.ErrorCode;
 import jakarta.persistence.*;

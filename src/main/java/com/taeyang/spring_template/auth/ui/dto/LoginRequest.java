@@ -1,4 +1,4 @@
-package com.taeyang.spring_template.member.dto;
+package com.taeyang.spring_template.auth.ui.dto;
 
 import com.taeyang.spring_template.common.validation.ValidId;
 import com.taeyang.spring_template.common.validation.ValidPw;
