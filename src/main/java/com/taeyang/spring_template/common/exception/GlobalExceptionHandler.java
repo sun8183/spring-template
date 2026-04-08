@@ -13,7 +13,6 @@ import java.util.List;
 
 import static com.taeyang.spring_template.common.exception.enums.ErrorCode.INTERNAL_ERROR;
 import static com.taeyang.spring_template.common.exception.enums.ErrorCode.INVALID_INPUT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice

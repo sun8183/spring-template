@@ -21,13 +21,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody @Valid LoginRequest request) {
+    public ApiResponse<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
         // 1. 비즈니스 로직 수행
         TokenResponse tokenResponse = authService.login(request);
-
-        return ResponseEntity
-                .status(SuccessCode.OK.getStatus()) // 또는 SuccessCode.LOGIN_SUCCESS.getStatus()
-                .body(ApiResponse.success(SuccessCode.OK, tokenResponse));
+        return ApiResponse.success(SuccessCode.OK, tokenResponse);
     }
 
     @PostMapping("/refresh")

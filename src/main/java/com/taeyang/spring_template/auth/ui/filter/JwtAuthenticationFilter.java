@@ -60,8 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String body = String.format(
                 "{\"code\":\"%s\",\"message\":\"%s\"}",
-                errorCode.code(),
-                errorCode.message()
+                errorCode.getCode(),
+                errorCode.getMessage()
         );
 
         response.getWriter().write(body);
