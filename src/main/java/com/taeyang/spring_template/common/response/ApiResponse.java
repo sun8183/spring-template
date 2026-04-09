@@ -25,7 +25,6 @@ public record ApiResponse<T>(
     }
 
     // 4. 실패 응답 (데이터 포함 - 유효성 검사 에러 목록 등 전달용)
-    // 이 부분을 추가/수정하여 제네릭 T를 받을 수 있게 합니다.
     public static <T> ApiResponse<T> error(BaseCode baseCode, T data) {
         return new ApiResponse<>(baseCode.getCode(), baseCode.getMessage(), data);
     }

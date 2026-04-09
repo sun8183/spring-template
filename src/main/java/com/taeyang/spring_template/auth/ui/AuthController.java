@@ -22,9 +22,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<TokenResponse> login(@RequestBody @Valid LoginRequest request) {
-        // 1. 비즈니스 로직 수행
-        TokenResponse tokenResponse = authService.login(request);
-        return ApiResponse.success(SuccessCode.OK, tokenResponse);
+        return ApiResponse.success(SuccessCode.OK, authService.login(request));
     }
 
     @PostMapping("/refresh")

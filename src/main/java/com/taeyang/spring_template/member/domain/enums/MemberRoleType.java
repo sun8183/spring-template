@@ -5,10 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Role {
+public enum MemberRoleType {
 
     ROLE_USER("일반 사용자"),
-
     ROLE_ADMIN("시스템 관리자");
 
     private final String description;

@@ -1,21 +1,33 @@
 package com.taeyang.spring_template.auth.ui.filter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taeyang.spring_template.auth.infrastructure.jwt.enums.JwtCode;
 import com.taeyang.spring_template.auth.infrastructure.jwt.JwtTokenProvider;
 import com.taeyang.spring_template.common.exception.enums.ErrorCode;
+import com.taeyang.spring_template.common.response.ApiResponse;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -27,13 +39,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         switch (tokenStatus) {
             case VALID:
+                // 1. 인증 객체 생성
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+
+                // 2. SecurityContext에 저장하여 필터 이후에 검증
+                SecurityContextHolder.getContext().setAuthentication(authentication);
                 break;
             case EXPIRED:
                 writeError(response, ErrorCode.JWT_EXPIRED);
                 return;
             case EMPTY:
-                writeError(response, ErrorCode.JWT_EMPTY);
-                return;
+                break;
             case INVALID:
             default:
                 writeError(response, ErrorCode.JWT_INVALID);
@@ -42,6 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 4. 다음 필터로 이동
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // 인증에 대한 접근 제어는 SecurityConfig 에서 직접 한다.
+        return false;
     }
 
     // 헤더에서 "Bearer " 접두사를 제거하고 토큰 값만 추출
@@ -53,25 +75,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    // 필터에서는 예외가 컨트롤러 까지 도달하지 않아 바로 응답
+    // 필터에서는 예외가 컨트롤러 까지 전파되지 않아 바로 응답
     private void writeError(HttpServletResponse response, ErrorCode errorCode) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
-
-        String body = String.format(
-                "{\"code\":\"%s\",\"message\":\"%s\"}",
-                errorCode.getCode(),
-                errorCode.getMessage()
-        );
-
-        response.getWriter().write(body);
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        // 아래 경로들로 들어오는 요청은 필터 로직을 아예 타지 않음
-        return path.startsWith("/api/auth/login") ||
-                path.startsWith("/h2-console");
+        response.setStatus(errorCode.getStatus().value());
+        String json = objectMapper.writeValueAsString(ApiResponse.error(errorCode));
+        response.getWriter().write(json);
     }
 }

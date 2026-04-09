@@ -7,43 +7,45 @@ import com.taeyang.spring_template.common.exception.CommonException;
 import com.taeyang.spring_template.member.domain.Member;
 import com.taeyang.spring_template.auth.ui.dto.LoginRequest;
 import com.taeyang.spring_template.auth.ui.dto.TokenResponse;
-import com.taeyang.spring_template.member.domain.MemberRepository;
+import com.taeyang.spring_template.member.domain.entity.MemberEntity;
+import com.taeyang.spring_template.member.domain.entity.MemberRoleEntity;
+import com.taeyang.spring_template.member.domain.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.taeyang.spring_template.common.exception.enums.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional(readOnly = true) // (더티체킹 방지용 옵션 - 데이터가 의도치 않게 수정되는것을 막기 위함)
 public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenStore tokenStore;
 
-    @Transactional
     public TokenResponse login(LoginRequest request) {
-        // 1. 이메일로 사용자 조회
-        Member member = memberRepository.findById(request.id())
-                .orElseThrow(() -> new CommonException(LOGIN_NOT_FOUND));
+        // 1. 아이디로 사용자 조회
+        Member member = memberRepository.findByIdWithRoles(request.id())
+                .orElseThrow(() -> new CommonException(LOGIN_NOT_FOUND)).toDomain();
 
         // 2. 도메인 엔티티 내부 로직으로 비밀번호 검증
         member.checkPassword(request.pw(), passwordEncoder);
 
         // 3. 인증 성공 시 JWT 토큰 생성 및 반환
-        String accessToken = jwtTokenProvider.createToken(member.getId(), member.getRole());
-        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        String accessToken = jwtTokenProvider.createToken(member.id(), member.roles());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.id());
 
         // 4. tokenStore에 refresh 저장
-        tokenStore.save(member.getId(), refreshToken);
+        tokenStore.save(member.id(), refreshToken);
 
         return TokenResponse.of(accessToken, refreshToken);
     }
 
-    @Transactional
     public TokenResponse refresh(String id, String refreshToken) {
         // 1. 저장된 리프레시 토큰 조회
         String savedToken = tokenStore.findByMemberId(id)
@@ -72,15 +74,15 @@ public class AuthService {
         tokenStore.deleteByMemberId(id);
 
         // 5. 사용자 조회 (권한 다시 세팅하려고)
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new CommonException(LOGIN_NOT_FOUND));
+        Member member = memberRepository.findByIdWithRoles(id)
+                .orElseThrow(() -> new CommonException(LOGIN_NOT_FOUND)).toDomain();
 
         // 6. 새로운 토큰 발급
-        String newAccessToken = jwtTokenProvider.createToken(member.getId(), member.getRole());
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(member.getId());
+        String newAccessToken = jwtTokenProvider.createToken(member.id(), member.roles());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(member.id());
 
         // 7. 새로운 리프레시 토큰 저장
-        tokenStore.save(member.getId(), newRefreshToken);
+        tokenStore.save(member.id(), newRefreshToken);
 
         return TokenResponse.of(newAccessToken, newRefreshToken);
     }

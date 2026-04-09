@@ -20,7 +20,6 @@ public enum ErrorCode implements BaseCode {
     // JWT 로그인 인증 실패 (HttpStatus.UNAUTHORIZED)
     JWT_INVALID(HttpStatus.UNAUTHORIZED, "J001", "유효하지 않은 액세스 토큰입니다."),
     JWT_EXPIRED(HttpStatus.UNAUTHORIZED, "J002", "액세스 토큰이 만료되었습니다."),
-    JWT_EMPTY(HttpStatus.UNAUTHORIZED, "J003", "액세스 토큰이 존재하지 않습니다."),
 
     // 리프레시 토큰 발급 실패
     RT_INVALID(HttpStatus.UNAUTHORIZED, "R001", "유효하지 않은 리프레시 토큰입니다."),

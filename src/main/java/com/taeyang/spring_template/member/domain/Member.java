@@ -1,47 +1,37 @@
 package com.taeyang.spring_template.member.domain;
 
-import com.taeyang.spring_template.member.domain.enums.Role;
+import com.taeyang.spring_template.member.domain.enums.MemberRoleType;
 import com.taeyang.spring_template.common.exception.CommonException;
 import com.taeyang.spring_template.common.exception.enums.ErrorCode;
-import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Entity
-@Getter
-@Table(name = "members")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+import java.util.ArrayList;
+import java.util.List;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idx;
-
-    @Column(nullable = false, unique = true, length = 16)
-    private String id;
-
-    @Column(nullable = false, length = 255)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private Role role;
-
-    // 빌더 패턴으로 객체 생성하기
+public record Member(Long idx, String id, String password, List<MemberRoleType> roles) {
     @Builder
-    public Member(String id, String password, Role role) {
+    public Member(Long idx, String id, String password, List<MemberRoleType> roles) {
+        this.idx = idx;
         this.id = id;
         this.password = password;
-        this.role = role;
+        this.roles = roles != null ? roles : new ArrayList<>();
     }
 
-    // 도메인에 비밀번호 체크 로직
+    // 비즈니스 로직: 비밀번호 체크
     public void checkPassword(String rawPassword, PasswordEncoder passwordEncoder) {
         if (!passwordEncoder.matches(rawPassword, this.password)) {
             throw new CommonException(ErrorCode.LOGIN_NOT_MATCH);
         }
+    }
+
+    // 비즈니스 로직: 특정 권한을 가지고 있는지 확인
+    public boolean hasRole(MemberRoleType targetRole) {
+        return roles.contains(targetRole);
+    }
+
+    // 비즈니스 로직: 관리자 여부 확인 (리스트 중 하나라도 ADMIN이 있는지)
+    public boolean isAdmin() {
+        return roles.contains(MemberRoleType.ROLE_ADMIN);
     }
 }
